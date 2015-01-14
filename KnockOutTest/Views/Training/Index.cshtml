@@ -1,0 +1,53 @@
+﻿
+@{
+    ViewBag.Title = "Index";
+}
+
+<h2>Index</h2>
+
+<input type="button" class="btn btn-default" value="new training" data-bind="click:$root.createTraining" />
+
+<table>
+    <tr>
+        <th>Name</th>
+    </tr>
+    <tbody data-bind="foreach:Trainings">
+        <tr>
+            <td><a data-bind="text:Name, click:$parent.editTraining"></a></td>
+        </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    var TrainingViewModel = function () {
+        var self = this;
+        var url = "/training/GetAllTrainings";
+
+        // Do ajax call to get all trainings
+        var refresh = function () {
+            $.getJSON(url, {}, function (data) {
+                self.Trainings(data);
+            });
+        }
+
+        // Public data properties
+        self.Trainings = ko.observableArray([]);
+
+        // Public operations
+        self.createTraining = function () {
+            window.location.href = '/Training/CreateEdit/0';
+        };
+
+        self.editTraining = function (training) {
+            window.location.href = '/Training/CreateEdit/' + training.TrainingId;
+        };
+
+        self.removeTraining = function (training) {
+            alert("delete training");
+        };
+
+        // Execute the getJSON action
+        refresh();
+    };
+    ko.applyBindings(new TrainingViewModel());
+</script>

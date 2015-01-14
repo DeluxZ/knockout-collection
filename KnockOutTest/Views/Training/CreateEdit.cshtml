@@ -1,0 +1,114 @@
+﻿
+@{
+    ViewBag.Title = "CreateEdit";
+}
+
+<h2>CreateEdit</h2>
+
+<h2>Training information</h2>
+<table class="table">
+    <tbody data-bind="with:training">
+        <tr>
+            <td>
+                <input data-bind="value: Name" placeholder="Name" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+
+<h2>Training dates</h2>
+<table class="table">
+    <tbody data-bind="foreach:trainingDateTimes">
+        <tr>
+            <td>
+                <input data-bind="value:StartDate" placeholder="startdate" />
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <input data-bind="value:EndDate" placeholder="enddate" />
+            </td>
+        </tr>
+    </tbody>
+</table>
+<p>
+    <button class="btn btn-default" data-bind="click:addTrainingDateTime">Add new date</button>
+</p>
+
+<button class="btn btn-sm btn-success" data-bind="click:saveTraining">Save training</button>
+<input class="btn btn-sm btn-primary" type="button" value="Back To Profile List" data-bind="click:$root.backToTrainingList" />
+
+<script type="text/javascript">
+    var urlTraining = "/training";
+    var TrainingDateTimes;
+    var url = window.location.pathname;
+    var trainingId = url.substring(url.lastIndexOf('/') + 1);
+
+    $.ajax({
+        url: urlTraining + '/InitializePageData',
+        async: false,
+        dataType: 'json',
+        success: function (json) {
+            TrainingDateTimes = json.TrainingDateTimes;
+        }
+    });
+
+    $(function () {
+        var Training = function (training) {
+            var self = this;
+
+            self.TrainingId = ko.observable(training ? training.TrainingId : 0);
+            self.Name = ko.observable(training ? training.Name : '');
+            self.TrainingDateTimes = ko.observableArray(training ? training.TrainingDateTimes : []);
+        };
+
+        var TrainingDateTime = function (trainingDateTime) {
+            var self = this;
+
+            self.StartDate = ko.observable(trainingDateTime ? trainingDateTime.StartDate : '');
+            self.EndDate = ko.observable(trainingDateTime ? trainingDateTime.EndDate : '');
+        };
+
+        var TrainingCollection = function () {
+            var self = this;
+
+            if (trainingId == 0) {
+                self.training = ko.observable(new Training());
+                self.trainingDateTimes = ko.observableArray([new TrainingDateTime()]);
+            } else {
+                $.ajax({
+                    url: urlTraining + '/GetTrainingById/' + trainingId,
+                    async: false,
+                    dataType: 'json',
+                    success: function (json) {
+                        self.training = ko.observable(new Training(json));
+                        self.trainingDateTimes = ko.observableArray(
+                            ko.utils.arrayMap(json.TrainingDateTimes, function (dateTime) {
+                                return dateTime;
+                            })
+                        );
+                    }
+                });
+            }
+
+            self.addTrainingDateTime = function () {
+                self.trainingDateTimes.push(new TrainingDateTime())
+            };
+
+            self.removeTrainingDateTime = function () {
+                alert("remove training date time");
+            };
+
+            self.backToTrainingList = function () {
+                window.location.href = urlTraining;
+            };
+
+            self.saveTraining = function () {
+                alert("check form and post with ajax call");
+            };
+        };
+
+        ko.applyBindings(new TrainingCollection());
+    });
+
+</script>
